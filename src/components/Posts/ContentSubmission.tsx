@@ -2,6 +2,22 @@ import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Loader2, AlertCircle } from 'lucide-react';
 
+interface Post {
+  id: string;
+  title: string;
+  content: string;
+  author: string;
+  status: string;
+  server: string;
+  worker: string | null;
+  moderationDetails: string | null;
+  createdAt: string;
+  completedAt?: string;
+  toxicityScore?: number | null;
+  reviewReason?: string | null;
+  category?: string;
+}
+
 interface ContentSubmissionProps {
   onSuccess: () => void;
   onCancel: () => void;

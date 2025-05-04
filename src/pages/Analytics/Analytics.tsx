@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Calendar, Calendar as CalendarIcon, BarChart2, Clock } from 'lucide-react';
+import { Calendar as CalendarIcon, BarChart2, Clock } from 'lucide-react';
 import ModeratorPerformance from '../../components/Analytics/ModeratorPerformance';
 import ContentCategoryChart from '../../components/Analytics/ContentCategoryChart';
 import ProcessingTimeChart from '../../components/Dashboard/ProcessingTimeChart';
@@ -8,9 +8,45 @@ import ContentActivityChart from '../../components/Dashboard/ContentActivityChar
 
 const Analytics: React.FC = () => {
   const { theme } = useTheme();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [period, setPeriod] = useState('week');
-  
+  const [insights, setInsights] = useState({
+    avgProcessingTime: '0s',
+    approvalRate: '0%',
+    contentVolume: '0',
+  });
+
+  useEffect(() => {
+    const fetchInsights = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`http://localhost:3001/api/posts?period=${period}`);
+        const data = await response.json();
+        const posts = data.posts || [];
+
+        const totalProcessed = posts.filter((p: { processingTime: any; }) => p.processingTime).length;
+        const totalTime = posts.reduce((sum: any, p: { processingTime: any; }) => sum + (p.processingTime || 0), 0);
+        const avgProcessingTime = totalProcessed > 0 ? (totalTime / totalProcessed / 1000).toFixed(1) : '0';
+        const approvalRate = posts.length > 0 
+          ? Math.round((posts.filter((  p: { status: string; }) => p.status === 'approved').length / posts.length) * 100)
+          : 0;
+        const contentVolume = posts.length;
+
+        setInsights({
+          avgProcessingTime: `${avgProcessingTime}s`,
+          approvalRate: `${approvalRate}%`,
+          contentVolume: contentVolume.toString(),
+        });
+      } catch (error) {
+        console.error('Error fetching insights:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInsights();
+  }, [period]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -55,7 +91,7 @@ const Analytics: React.FC = () => {
             </div>
             <h2 className="font-medium">Content Activity</h2>
           </div>
-          <ContentActivityChart />
+          <ContentActivityChart period={period} isLoading={isLoading} />
         </div>
         
         <div className={`p-6 rounded-lg ${
@@ -69,7 +105,7 @@ const Analytics: React.FC = () => {
             </div>
             <h2 className="font-medium">Processing Time</h2>
           </div>
-          <ProcessingTimeChart />
+          <ProcessingTimeChart period={period} isLoading={isLoading} />
         </div>
       </div>
       
@@ -78,14 +114,14 @@ const Analytics: React.FC = () => {
           theme === 'dark' ? 'bg-gray-800' : 'bg-white'
         } shadow-sm lg:col-span-2`}>
           <h2 className="font-medium mb-4">Moderator Performance</h2>
-          <ModeratorPerformance />
+          <ModeratorPerformance period={period} isLoading={isLoading} />
         </div>
         
         <div className={`p-6 rounded-lg ${
           theme === 'dark' ? 'bg-gray-800' : 'bg-white'
         } shadow-sm`}>
           <h2 className="font-medium mb-4">Content Categories</h2>
-          <ContentCategoryChart />
+          <ContentCategoryChart period={period} isLoading={isLoading} />
         </div>
       </div>
       
@@ -96,20 +132,20 @@ const Analytics: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InsightCard 
             title="Average Processing Time" 
-            value="2.4s" 
-            change="-12%" 
-            trend="down" 
+            value={insights.avgProcessingTime} 
+            change="N/A" 
+            trend="up" 
           />
           <InsightCard 
             title="Approval Rate" 
-            value="76%" 
-            change="+5%" 
+            value={insights.approvalRate} 
+            change="N/A" 
             trend="up" 
           />
           <InsightCard 
             title="Content Volume" 
-            value="245" 
-            change="+23%" 
+            value={insights.contentVolume} 
+            change="N/A" 
             trend="up" 
           />
         </div>

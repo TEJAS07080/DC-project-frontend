@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { CheckCircle, XCircle, Clock, ListFilter, Search } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, ListFilter, Search, HelpCircle } from 'lucide-react';
 
 interface ContentFiltersProps {
   filter: string;
@@ -10,6 +10,7 @@ interface ContentFiltersProps {
     approved: number;
     rejected: number;
     pending: number;
+    needs_review: number;
   };
 }
 
@@ -47,7 +48,7 @@ const ContentFilters: React.FC<ContentFiltersProps> = ({ filter, setFilter, stat
         </button>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
         <FilterButton 
           label="All" 
           count={stats.total}
@@ -70,6 +71,14 @@ const ContentFilters: React.FC<ContentFiltersProps> = ({ filter, setFilter, stat
           onClick={() => setFilter('rejected')} 
           icon={<XCircle className="h-4 w-4 mr-1" />}
           color="red"
+        />
+        <FilterButton 
+          label="Needs Review" 
+          count={stats.needs_review}
+          isActive={filter === 'needs_review'} 
+          onClick={() => setFilter('needs_review')} 
+          icon={<HelpCircle className="h-4 w-4 mr-1" />}
+          color="purple"
         />
         <FilterButton 
           label="Pending" 
@@ -144,7 +153,7 @@ interface FilterButtonProps {
   isActive: boolean;
   onClick: () => void;
   icon: React.ReactNode | null;
-  color?: 'blue' | 'green' | 'red' | 'amber';
+  color?: 'blue' | 'green' | 'red' | 'amber' | 'purple';
 }
 
 const FilterButton: React.FC<FilterButtonProps> = ({
@@ -166,6 +175,8 @@ const FilterButton: React.FC<FilterButtonProps> = ({
           return 'bg-red-600 text-white';
         case 'amber':
           return 'bg-amber-600 text-white';
+        case 'purple':
+          return 'bg-purple-600 text-white';
         default:
           return 'bg-blue-600 text-white';
       }

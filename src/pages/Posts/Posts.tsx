@@ -14,7 +14,7 @@ const Posts: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [submitForm, setSubmitForm] = useState(false);
   const [filter, setFilter] = useState('all');
-  const [stats, setStats] = useState({ total: 0, approved: 0, rejected: 0, pending: 0 });
+  const [stats, setStats] = useState({ total: 0, approved: 0, rejected: 0, pending: 0, needs_review: 0 });
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,8 +38,14 @@ const Posts: React.FC = () => {
           throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
         const data = await response.json();
-        setPosts(Array.isArray(data.posts) ? data.posts : []);
-        setStats(data.stats || { total: 0, approved: 0, rejected: 0, pending: 0 });
+        // Sort posts by createdAt in descending order (newest first)
+        const sortedPosts = Array.isArray(data.posts) 
+          ? data.posts.sort((a: any, b: any) => 
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            )
+          : [];
+        setPosts(sortedPosts);
+        setStats(data.stats || { total: 0, approved: 0, rejected: 0, pending: 0, needs_review: 0 });
         // Reset to first page when filter changes
         setCurrentPage(1);
       } catch (error) {

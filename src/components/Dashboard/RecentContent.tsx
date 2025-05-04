@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, AlertTriangle, HelpCircle } from 'lucide-react';
 
 interface Post {
   id: string;
@@ -13,6 +13,8 @@ interface Post {
   moderationDetails: string | null;
   createdAt: string;
   completedAt?: string;
+  toxicityScore?: number | null;
+  reviewReason?: string | null;
 }
 
 interface RecentContentProps {
@@ -35,6 +37,11 @@ const RecentContent: React.FC<RecentContentProps> = ({ posts }) => {
     );
   }
 
+  // Sort posts by createdAt in descending order (newest first)
+  const sortedPosts = [...posts].sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
   return (
     <div className={`rounded-lg p-4 ${
       theme === 'dark' ? 'bg-gray-800' : 'bg-white'
@@ -45,7 +52,7 @@ const RecentContent: React.FC<RecentContentProps> = ({ posts }) => {
       </div>
       
       <div className="space-y-3 overflow-hidden">
-        {posts.map((post) => (
+        {sortedPosts.map((post) => (
           <div 
             key={post.id}
             className={`p-3 rounded-lg border ${
@@ -81,16 +88,26 @@ const RecentContent: React.FC<RecentContentProps> = ({ posts }) => {
                     Pending
                   </span>
                 )}
+                {post.status === 'needs_review' && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-600">
+                    <HelpCircle className="h-3 w-3 mr-1" />
+                    Needs Review
+                  </span>
+                )}
               </div>
             </div>
             
-            {post.moderationDetails && (
+            {(post.moderationDetails || post.reviewReason) && (
               <div className={`mt-2 px-2 py-1 text-xs rounded-sm ${
                 post.status === 'approved' 
                   ? 'bg-green-50 dark:bg-green-900/10 text-green-600'
+                  : post.status === 'needs_review'
+                  ? 'bg-purple-50 dark:bg-purple-900/10 text-purple-600'
                   : 'bg-red-50 dark:bg-red-900/10 text-red-600'
               }`}>
                 {post.moderationDetails}
+                {post.toxicityScore != null && ` (Toxicity Score: ${(post.toxicityScore ?? 0).toFixed(2)})`}
+                {post.reviewReason && ` | Reason: ${post.reviewReason}`}
               </div>
             )}
             

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { FileText, CheckCircle, XCircle, Clock, BarChart } from 'lucide-react';
+import { FileText, CheckCircle, XCircle, Clock, HelpCircle, BarChart } from 'lucide-react';
 
 interface StatsProps {
   stats: {
@@ -9,13 +9,13 @@ interface StatsProps {
     rejected: number;
     pending: number;
     processing?: number;
+    needs_review?: number;
   };
 }
 
 const StatsOverview: React.FC<StatsProps> = ({ stats }) => {
   const { theme } = useTheme();
   
-  // Calculate percentages for progress bars
   const approvalRate = stats.total > 0 
     ? Math.round((stats.approved / stats.total) * 100) 
     : 0;
@@ -25,7 +25,7 @@ const StatsOverview: React.FC<StatsProps> = ({ stats }) => {
     : 0;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
       <StatCard 
         title="Total Content" 
         value={stats.total} 
@@ -47,10 +47,16 @@ const StatsOverview: React.FC<StatsProps> = ({ stats }) => {
         percentage={rejectionRate}
       />
       <StatCard 
-        title="Pending Review" 
-        value={stats.pending + (stats.processing || 0)} 
+        title="Pending" 
+        value={stats.pending} 
         icon={<Clock className="h-5 w-5" />}
         color="amber"
+      />
+      <StatCard 
+        title="Needs Review" 
+        value={stats.needs_review || 0} 
+        icon={<HelpCircle className="h-5 w-5" />}
+        color="purple"
       />
     </div>
   );
@@ -60,7 +66,7 @@ interface StatCardProps {
   title: string;
   value: number;
   icon: React.ReactNode;
-  color: 'blue' | 'green' | 'red' | 'amber';
+  color: 'blue' | 'green' | 'red' | 'amber' | 'purple';
   percentage?: number;
 }
 
@@ -93,6 +99,11 @@ const StatCard: React.FC<StatCardProps> = ({
       bg: theme === 'dark' ? 'bg-amber-900/30' : 'bg-amber-100',
       text: 'text-amber-600',
       progress: 'bg-amber-600'
+    },
+    purple: {
+      bg: theme === 'dark' ? 'bg-purple-900/30' : 'bg-purple-100',
+      text: 'text-purple-600',
+      progress: 'bg-purple-600'
     }
   };
 

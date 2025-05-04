@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { CheckCircle, XCircle, Clock, AlertTriangle, Trash2, Edit, Eye, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, AlertTriangle, Trash2, Edit, Eye, Loader2, HelpCircle } from 'lucide-react';
 
 interface Post {
   id: string;
@@ -13,6 +13,9 @@ interface Post {
   moderationDetails: string | null;
   createdAt: string;
   completedAt?: string;
+  toxicityScore?: number | null;
+  reviewReason?: string | null;
+  category?: string;
 }
 
 interface ContentListProps {
@@ -36,31 +39,47 @@ const ContentList: React.FC<ContentListProps> = ({ posts }) => {
     );
   }
 
+  // Sort posts by createdAt in descending order (newest first)
+  const sortedPosts = [...posts].sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'approved':
         return {
           bg: theme === 'dark' ? 'bg-green-900/30' : 'bg-green-100',
           text: 'text-green-600',
-          icon: <CheckCircle className="h-4 w-4 mr-1" />
+          icon: <CheckCircle className="h-4 w-4 mr-1" />,
+          border: 'border-green-500'
         };
       case 'rejected':
         return {
           bg: theme === 'dark' ? 'bg-red-900/30' : 'bg-red-100',
           text: 'text-red-600',
-          icon: <XCircle className="h-4 w-4 mr-1" />
+          icon: <XCircle className="h-4 w-4 mr-1" />,
+          border: 'border-red-500'
         };
       case 'processing':
         return {
           bg: theme === 'dark' ? 'bg-blue-900/30' : 'bg-blue-100',
           text: 'text-blue-600',
-          icon: <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+          icon: <Loader2 className="h-4 w-4 mr-1 animate-spin" />,
+          border: 'border-blue-500'
+        };
+      case 'needs_review':
+        return {
+          bg: theme === 'dark' ? 'bg-purple-900/30' : 'bg-purple-100',
+          text: 'text-purple-600',
+          icon: <HelpCircle className="h-4 w-4 mr-1" />,
+          border: 'border-purple-500'
         };
       default:
         return {
           bg: theme === 'dark' ? 'bg-amber-900/30' : 'bg-amber-100',
           text: 'text-amber-600',
-          icon: <Clock className="h-4 w-4 mr-1" />
+          icon: <Clock className="h-4 w-4 mr-1" />,
+          border: 'border-amber-500'
         };
     }
   };
@@ -81,7 +100,7 @@ const ContentList: React.FC<ContentListProps> = ({ posts }) => {
   
   return (
     <div className="space-y-4">
-      {posts.map(post => {
+      {sortedPosts.map(post => {
         const statusInfo = getStatusColor(post.status);
         
         return (
@@ -89,18 +108,13 @@ const ContentList: React.FC<ContentListProps> = ({ posts }) => {
             key={post.id}
             className={`p-4 rounded-lg ${
               theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-            } shadow-sm border-l-4 ${
-              post.status === 'approved' ? 'border-green-500' : 
-              post.status === 'rejected' ? 'border-red-500' : 
-              post.status === 'processing' ? 'border-blue-500' : 
-              'border-amber-500'
-            }`}
+            } shadow-sm border-l-4 ${statusInfo.border}`}
           >
             <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-3">
               <div>
                 <h3 className="font-medium">{post.title}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  By {post.author} · {getTimeAgo(post.createdAt)}
+                  By {post.author} · {getTimeAgo(post.createdAt)} · Category: {post.category || 'General'}
                 </p>
               </div>
               <div className={`flex items-center px-3 py-1 rounded-full text-sm ${statusInfo.bg} ${statusInfo.text} mt-2 sm:mt-0`}>
@@ -113,13 +127,17 @@ const ContentList: React.FC<ContentListProps> = ({ posts }) => {
               {post.content}
             </p>
             
-            {post.moderationDetails && (
+            {(post.moderationDetails || post.reviewReason) && (
               <div className={`mb-3 p-2 text-sm rounded ${
                 post.status === 'approved' 
                   ? 'bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-400'
+                  : post.status === 'needs_review'
+                  ? 'bg-purple-50 dark:bg-purple-900/10 text-purple-700 dark:text-purple-400'
                   : 'bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-400'
               }`}>
                 <strong>Moderation note:</strong> {post.moderationDetails}
+                {post.toxicityScore != null && ` (Toxicity Score: ${(post.toxicityScore ?? 0).toFixed(2)})`}
+                {post.reviewReason && ` | Reason: ${post.reviewReason}`}
               </div>
             )}
             
