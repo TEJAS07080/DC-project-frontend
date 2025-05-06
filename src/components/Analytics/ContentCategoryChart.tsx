@@ -29,7 +29,7 @@ const ContentCategoryChart: React.FC<ContentCategoryChartProps> = ({ period, isL
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/api/categories?period=${period}`);
+        const response = await fetch(`/api/categories?period=${period}`);
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);
         }

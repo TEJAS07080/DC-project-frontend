@@ -24,7 +24,7 @@ const ContentActivityChart: React.FC<ContentActivityChartProps> = ({ period = 'w
   useEffect(() => {
     const fetchActivity = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/api/activity?period=${period}`);
+        const response = await fetch(`/api/activity?period=${period}`);
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);
         }

@@ -44,7 +44,7 @@ const ContentSubmission: React.FC<ContentSubmissionProps> = ({ onSuccess, onCanc
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('http://localhost:3001/api/posts', {
+      const response = await fetch('/api/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

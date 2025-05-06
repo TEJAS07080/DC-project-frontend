@@ -30,19 +30,19 @@ const Dashboard: React.FC = () => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        const postsResponse = await fetch(`http://localhost:3001/api/posts?period=${period}`);
+        const postsResponse = await fetch(`/api/posts?period=${period}`);
         if (!postsResponse.ok) throw new Error('Failed to fetch posts data');
         const postsData = await postsResponse.json();
 
-        const statusResponse = await fetch('http://localhost:3001/api/status');
+        const statusResponse = await fetch('/api/status');
         if (!statusResponse.ok) throw new Error('Failed to fetch server status');
         const statusData = await statusResponse.json();
 
-        const processingTimesResponse = await fetch(`http://localhost:3001/api/processing-times?period=${period}`);
+        const processingTimesResponse = await fetch(`/api/processing-times?period=${period}`);
         if (!processingTimesResponse.ok) throw new Error('Failed to fetch processing times');
         const processingTimesData = await processingTimesResponse.json();
 
-        const activityResponse = await fetch(`http://localhost:3001/api/activity?period=${period}`);
+        const activityResponse = await fetch(`/api/activity?period=${period}`);
         if (!activityResponse.ok) throw new Error('Failed to fetch activity data');
         const activityData = await activityResponse.json();
 

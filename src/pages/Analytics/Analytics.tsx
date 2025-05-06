@@ -20,7 +20,7 @@ const Analytics: React.FC = () => {
     const fetchInsights = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`http://localhost:3001/api/posts?period=${period}`);
+        const response = await fetch(`/api/posts?period=${period}`);
         const data = await response.json();
         const posts = data.posts || [];
 

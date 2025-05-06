@@ -21,7 +21,7 @@ const ProcessingTimeChart: React.FC<ProcessingTimeChartProps> = ({ period, isLoa
   useEffect(() => {
     const fetchProcessingTimes = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/api/processing-times?period=${period}`);
+        const response = await fetch(`/api/processing-times?period=${period}`);
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
