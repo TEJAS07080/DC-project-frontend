@@ -3,15 +3,21 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { Server, CheckCircle, XCircle } from 'lucide-react';
 
 interface ServerStatusProps {
-  status: Record<string, boolean>;
+  status: Record<string, string>; // Changed from boolean to string to handle 'busy', 'idle', 'offline'
 }
 
 const ServerStatus: React.FC<ServerStatusProps> = ({ status }) => {
   const { theme } = useTheme();
 
+  // Map status to online/offline for display
+  const isOnline = (statusValue: string | boolean) => {
+    if (typeof statusValue === 'boolean') return statusValue;
+    return ['busy', 'idle'].includes(statusValue);
+  };
+
   // Count online/offline servers
   const totalServers = Object.keys(status).length;
-  const onlineServers = Object.values(status).filter(Boolean).length;
+  const onlineServers = Object.values(status).filter(isOnline).length;
   
   // Calculate percentage
   const onlinePercentage = totalServers ? Math.round((onlineServers / totalServers) * 100) : 0;
@@ -43,24 +49,27 @@ const ServerStatus: React.FC<ServerStatusProps> = ({ status }) => {
       </div>
       
       <div className="space-y-3 max-h-48 overflow-y-auto">
-        {Object.entries(status).map(([server, isOnline]) => (
-          <div 
-            key={server}
-            className={`flex items-center justify-between p-2 rounded-md ${
-              theme === 'dark' 
-                ? isOnline ? 'bg-green-900/20' : 'bg-red-900/20'
-                : isOnline ? 'bg-green-50' : 'bg-red-50'
-            }`}
-          >
-            <div className="flex items-center">
-              <div className={`w-3 h-3 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'} mr-3`}></div>
-              <span className="text-sm font-medium">{server}</span>
+        {Object.entries(status).map(([server, statusValue]) => {
+          const online = isOnline(statusValue);
+          return (
+            <div 
+              key={server}
+              className={`flex items-center justify-between p-2 rounded-md ${
+                theme === 'dark' 
+                  ? online ? 'bg-green-900/20' : 'bg-red-900/20'
+                  : online ? 'bg-green-50' : 'bg-red-50'
+              }`}
+            >
+              <div className="flex items-center">
+                <div className={`w-3 h-3 rounded-full ${online ? 'bg-green-500' : 'bg-red-500'} mr-3`}></div>
+                <span className="text-sm font-medium">{server}</span>
+              </div>
+              <span className={`text-xs ${online ? 'text-green-600' : 'text-red-600'}`}>
+                {typeof statusValue === 'boolean' ? (statusValue ? 'Online' : 'Offline') : statusValue}
+              </span>
             </div>
-            <span className={`text-xs ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
-              {isOnline ? 'Online' : 'Offline'}
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
       
       <div className="flex flex-col space-y-2 mt-4">
